@@ -13,12 +13,14 @@
     --text: #e7ebf7;
     --muted: #8a92b2;
     --accent: #6d5bff;
+    --accent-dark: #4338ca;
     --accent-light: rgba(109, 92, 255, 0.16);
+    --accent-glow: rgba(109, 92, 255, 0.4);
     --meeting: #2dd4bf;
     --meeting-bg: rgba(45, 212, 191, 0.14);
-    --white: #11162a;
     --surface: #131829;
     --surface-alt: #1a2138;
+    --surface-hover: #1e2748;
     --maikoll: #38bdf8;
     --maikoll-bg: rgba(56, 189, 248, 0.14);
     --breider: #f472b6;
@@ -54,7 +56,7 @@
     color: var(--navy-dark);
     margin: 0 0 8px;
     letter-spacing: 0.3px;
-    text-shadow: 0 0 24px rgba(124, 92, 255, 0.4);
+    text-shadow: 0 0 24px var(--accent-glow);
   }
 
   header p {
@@ -91,7 +93,7 @@
   }
 
   thead th {
-    background: linear-gradient(135deg, var(--accent), #4338ca);
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
     color: #f5f3ff;
     text-align: left;
     padding: 10px 12px;
@@ -169,16 +171,17 @@
     user-select: none;
     font-family: Arial, sans-serif;
     background: var(--surface-alt);
+    transition: background 0.2s ease;
   }
 
-  .phase-header:hover { background: #2c1f15; }
+  .phase-header:hover { background: var(--surface-hover); }
 
   .phase-number {
     flex-shrink: 0;
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), #4338ca);
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
     color: #f5f3ff;
     display: flex;
     align-items: center;
@@ -367,6 +370,14 @@
     margin-top: 20px;
   }
 
+  #save-status {
+    margin-top: 6px;
+    font-size: 0.78rem;
+    color: var(--meeting);
+    min-height: 1em;
+    transition: opacity 0.3s ease;
+  }
+
   .reset-btn {
     display: block;
     margin: 0 auto 30px;
@@ -471,6 +482,7 @@
 
   <footer>
     El progreso se guarda automáticamente en este navegador.
+    <div id="save-status"></div>
   </footer>
 
 </div>
@@ -570,10 +582,34 @@
     }
   }
 
+  let saveStatusTimer = null;
+
+  function showSaveStatus(ok) {
+    const el = document.getElementById("save-status");
+    if (!el) return;
+    if (saveStatusTimer) clearTimeout(saveStatusTimer);
+    if (ok) {
+      const now = new Date();
+      const time = now.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      el.textContent = `Guardado ✓ ${time}`;
+      el.style.color = "var(--meeting)";
+    } else {
+      el.textContent = "No se pudo guardar en este navegador. Copia tu avance antes de cerrar la pestaña.";
+      el.style.color = "var(--breider)";
+    }
+    el.style.opacity = "1";
+    saveStatusTimer = setTimeout(() => { el.style.opacity = "0.55"; }, 2500);
+  }
+
   function saveState(state) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (e) {}
+      showSaveStatus(true);
+      return true;
+    } catch (e) {
+      showSaveStatus(false);
+      return false;
+    }
   }
 
   let state = loadState();
@@ -710,6 +746,12 @@
   phasesData.forEach((_, pIndex) => updatePhaseProgress(pIndex));
   updateOverallProgress();
   updateRespSummary();
+
+  // Guarda también si el usuario cierra o cambia de pestaña justo después de marcar algo
+  window.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") saveState(state);
+  });
+  window.addEventListener("pagehide", () => saveState(state));
 
   document.getElementById("reset-btn").addEventListener("click", () => {
     if (confirm("¿Seguro que deseas reiniciar el checklist y las asignaciones de responsables? Esta acción no se puede deshacer.")) {
