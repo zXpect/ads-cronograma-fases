@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma — Adaptación al Formato de Anteproyecto (ADS)</title>
+<style>
+  :root {
+    --navy: #7c5cff;
+    --navy-dark: #b9a6ff;
+    --gray-bg: #0a0e1a;
+    --gray-border: #232a44;
+    --text: #e7ebf7;
+    --muted: #8a92b2;
+    --accent: #6d5bff;
+    --accent-light: rgba(109, 92, 255, 0.16);
+    --meeting: #2dd4bf;
+    --meeting-bg: rgba(45, 212, 191, 0.14);
+    --white: #11162a;
+    --surface: #131829;
+    --surface-alt: #1a2138;
+    --maikoll: #38bdf8;
+    --maikoll-bg: rgba(56, 189, 248, 0.14);
+    --breider: #f472b6;
+    --breider-bg: rgba(244, 114, 182, 0.14);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 40px 20px 80px;
+    background:
+      radial-gradient(circle at 15% -10%, rgba(109, 92, 255, 0.18), transparent 45%),
+      radial-gradient(circle at 100% 0%, rgba(45, 212, 191, 0.10), transparent 40%),
+      var(--gray-bg);
+    font-family: "Georgia", "Times New Roman", serif;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  header h1 {
+    font-size: 1.7rem;
+    color: var(--navy-dark);
+    margin: 0 0 8px;
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 24px rgba(124, 92, 255, 0.4);
+  }
+
+  header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-family: Arial, sans-serif;
+  }
+
+  section {
+    background: var(--surface);
+    border: 1px solid var(--gray-border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 28px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  }
+
+  section > h2 {
+    font-size: 1.15rem;
+    color: var(--navy-dark);
+    margin-top: 0;
+    border-bottom: 2px solid var(--navy);
+    padding-bottom: 8px;
+    margin-bottom: 18px;
+  }
+
+  /* ---------- Tabla de cronograma ---------- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    font-size: 0.92rem;
+  }
+
+  thead th {
+    background: linear-gradient(135deg, var(--accent), #4338ca);
+    color: #f5f3ff;
+    text-align: left;
+    padding: 10px 12px;
+    font-weight: 700;
+    border-radius: 4px 4px 0 0;
+  }
+
+  tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--gray-border);
+    vertical-align: top;
+  }
+
+  tbody tr:nth-child(even) { background: var(--surface-alt); }
+
+  tr.meeting-row td:nth-child(3) {
+    color: var(--meeting);
+    font-weight: 600;
+  }
+
+  tr.milestone-row {
+    background: var(--accent-light) !important;
+  }
+
+  tr.milestone-row td {
+    font-weight: 700;
+    color: var(--navy-dark);
+  }
+
+  /* ---------- Resumen general de avance ---------- */
+  .overall {
+    font-family: Arial, sans-serif;
+  }
+
+  .overall-bar-track {
+    width: 100%;
+    height: 14px;
+    background: var(--gray-border);
+    border-radius: 7px;
+    overflow: hidden;
+    margin: 10px 0 6px;
+  }
+
+  .overall-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--meeting));
+    width: 0%;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 12px rgba(109, 92, 255, 0.5);
+  }
+
+  .overall-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  /* ---------- Fases (accordion) ---------- */
+  .phase {
+    border: 1px solid var(--gray-border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    background: var(--surface);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    cursor: pointer;
+    user-select: none;
+    font-family: Arial, sans-serif;
+    background: var(--surface-alt);
+  }
+
+  .phase-header:hover { background: #2c1f15; }
+
+  .phase-number {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #4338ca);
+    color: #f5f3ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  .phase-title-block {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .phase-title {
+    font-weight: 700;
+    color: var(--navy-dark);
+    font-size: 1rem;
+    margin: 0 0 6px;
+  }
+
+  .phase-progress-track {
+    width: 100%;
+    height: 8px;
+    background: var(--gray-border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .phase-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.25s ease;
+  }
+
+  .phase-percent {
+    flex-shrink: 0;
+    width: 52px;
+    text-align: right;
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 0.95rem;
+  }
+
+  .phase-caret {
+    flex-shrink: 0;
+    width: 18px;
+    text-align: center;
+    color: var(--muted);
+    transition: transform 0.2s ease;
+    font-size: 0.85rem;
+  }
+
+  .phase.open { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(109, 92, 255, 0.3); }
+
+  .phase.open .phase-caret { transform: rotate(90deg); }
+
+  .phase-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+    border-top: 1px solid transparent;
+  }
+
+  .phase.open .phase-body {
+    border-top: 1px solid var(--gray-border);
+  }
+
+  .phase-desc {
+    padding: 14px 18px 4px;
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-family: Arial, sans-serif;
+    line-height: 1.5;
+  }
+
+  .checklist {
+    list-style: none;
+    margin: 0;
+    padding: 4px 18px 16px;
+    font-family: Arial, sans-serif;
+  }
+
+  .checklist li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px dashed var(--gray-border);
+    font-size: 0.92rem;
+  }
+
+  .checklist li:last-child { border-bottom: none; }
+
+  .checklist input[type="checkbox"] {
+    margin-top: 2px;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .checklist label {
+    cursor: pointer;
+    color: var(--text);
+    flex: 1;
+    min-width: 0;
+  }
+
+  .checklist input:checked + label {
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+
+  .resp-select {
+    flex-shrink: 0;
+    background: var(--surface-alt);
+    color: var(--muted);
+    border: 1px solid var(--gray-border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.78rem;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .resp-select:focus { outline: none; border-color: var(--accent); }
+
+  .checklist li[data-resp="maikoll"] .resp-select { border-color: var(--maikoll); color: var(--maikoll); }
+  .checklist li[data-resp="breider"] .resp-select { border-color: var(--breider); color: var(--breider); }
+
+  /* ---------- Resumen de responsables ---------- */
+  .resp-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+    font-family: Arial, sans-serif;
+  }
+
+  .resp-chip {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: var(--surface-alt);
+    border: 1px solid var(--gray-border);
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  .resp-chip .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .resp-chip.maikoll { border-color: var(--maikoll); color: var(--maikoll); }
+  .resp-chip.breider { border-color: var(--breider); color: var(--breider); }
+
+  .legend {
+    font-family: Arial, sans-serif;
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .legend span.dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-family: Arial, sans-serif;
+    margin-top: 20px;
+  }
+
+  .reset-btn {
+    display: block;
+    margin: 0 auto 30px;
+    background: var(--surface);
+    border: 1px solid var(--gray-border);
+    color: var(--muted);
+    font-family: Arial, sans-serif;
+    font-size: 0.82rem;
+    padding: 7px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+  .reset-btn:hover { background: var(--surface-alt); color: var(--navy-dark); border-color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Cronograma — Adaptación al Formato de Anteproyecto</h1>
+    <p>Proyecto ADS · Entrega de propuesta: 16 de septiembre de 2026</p>
+  </header>
+
+  <section>
+    <h2>Cronograma general</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Fechas</th>
+          <th>Fases</th>
+          <th>Hito</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="meeting-row">
+          <td>Lun 31 ago – Jue 3 sep</td>
+          <td>Fases 1, 2 y 3</td>
+          <td>Reunión con el docente director</td>
+        </tr>
+        <tr class="meeting-row">
+          <td>Vie 4 – Dom 6 sep</td>
+          <td>Fases 4 y 5</td>
+          <td>Reunión el domingo 6 o lunes 7 sep</td>
+        </tr>
+        <tr class="meeting-row">
+          <td>Lun 7 – Mié 9 sep</td>
+          <td>Fase 6</td>
+          <td>Reunión el mismo miércoles o jueves 10</td>
+        </tr>
+        <tr class="meeting-row">
+          <td>Jue 10 – Vie 11 sep</td>
+          <td>Fases 7 y 8</td>
+          <td>Reunión 11 o 12 sep — revisión de correcciones finales</td>
+        </tr>
+        <tr>
+          <td>Sáb 12 – Lun 14 sep</td>
+          <td>Ajustes según correcciones</td>
+          <td>Revisión de tablas y referencias</td>
+        </tr>
+        <tr class="meeting-row">
+          <td>Mar 15 sep</td>
+          <td>—</td>
+          <td>Reunión final — última revisión previa a entrega</td>
+        </tr>
+        <tr class="milestone-row">
+          <td>Mié 16 sep</td>
+          <td>—</td>
+          <td>Entrega de la propuesta</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="legend">
+      <span class="dot" style="background:var(--meeting-bg); border:1px solid var(--meeting);"></span>Fila con reunión programada &nbsp;&nbsp;
+      <span class="dot" style="background:var(--accent-light); border:1px solid var(--accent);"></span>Entrega final
+    </p>
+  </section>
+
+  <section>
+    <h2>Avance general de fases</h2>
+    <div class="overall">
+      <div class="overall-bar-track">
+        <div class="overall-bar-fill" id="overall-fill"></div>
+      </div>
+      <div class="overall-label">
+        <span id="overall-text">0 de 0 tareas completadas</span>
+        <span id="overall-percent">0%</span>
+      </div>
+      <div class="resp-summary">
+        <span class="resp-chip maikoll"><span class="dot" style="background:var(--maikoll);"></span>Maikoll Ballesteros: <span id="resp-done-maikoll">0</span> de <span id="resp-count-maikoll">0</span></span>
+        <span class="resp-chip breider"><span class="dot" style="background:var(--breider);"></span>Breider Lopez: <span id="resp-done-breider">0</span> de <span id="resp-count-breider">0</span></span>
+        <span class="resp-chip"><span class="dot" style="background:var(--gray-border);"></span>Sin asignar: <span id="resp-count-unassigned">0</span></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Fases del proyecto</h2>
+    <button class="reset-btn" id="reset-btn">Reiniciar todo el checklist</button>
+    <div id="phases-container"></div>
+  </section>
+
+  <footer>
+    El progreso se guarda automáticamente en este navegador.
+  </footer>
+
+</div>
+
+<script>
+  const phasesData = [
+    {
+      title: "Etapa 1 — Mapeo y control de contenido",
+      desc: "Hacer una tabla de correspondencia sección por sección: qué parte del documento global va a cada sección del formato oficial, qué se reescribe, qué se recorta (contenido de desarrollo/técnico que no va en esta entrega) y qué falta crear desde cero (Alcances y Limitaciones, Marco conceptual).",
+      tasks: [
+        "Revisar el documento global completo (ADS_TG)",
+        "Revisar el formato oficial de anteproyecto completo",
+        "Crear tabla de correspondencia sección por sección",
+        "Identificar contenido técnico/desarrollo a recortar",
+        "Identificar secciones faltantes (Alcances, Marco conceptual)"
+      ]
+    },
+    {
+      title: "Etapa 2 — Portada, índice y preliminares",
+      desc: "Adaptar portada con datos de autores, programa, director y fecha; dejar la estructura de Índice, Índice de tablas e Índice de figuras lista para generarse automáticamente una vez armado el cuerpo.",
+      tasks: [
+        "Adaptar portada (autores, programa, director, fecha)",
+        "Configurar estructura del Índice general",
+        "Configurar Índice de tablas",
+        "Configurar Índice de figuras"
+      ]
+    },
+    {
+      title: "Etapa 3 — Cuerpo introductorio",
+      desc: "Trasladar y ajustar el texto ya redactado al formato exigido, revisando que la Introducción cumpla los 4 lineamientos del formato (contextualización, motivación, propósito, planificación).",
+      tasks: [
+        "Trasladar y ajustar la Introducción a los 4 lineamientos",
+        "Trasladar el Resumen",
+        "Trasladar el Abstract",
+        "Revisar Palabras clave"
+      ]
+    },
+    {
+      title: "Etapa 4 — Problema, Justificación y Objetivos",
+      desc: "Migrar Definición del problema, Formulación, Justificación y Objetivos (general/específicos), verificando consistencia con los objetivos usados luego en el cronograma y en las conclusiones parciales.",
+      tasks: [
+        "Migrar Definición del problema",
+        "Migrar Formulación del problema",
+        "Migrar Justificación",
+        "Migrar Objetivo general",
+        "Migrar Objetivos específicos",
+        "Verificar consistencia con cronograma y conclusiones"
+      ]
+    },
+    {
+      title: "Etapa 5 — Alcances y Limitaciones (sección nueva)",
+      desc: "Redactar esta sección desde cero basándose en lo que el proyecto ya ha definido como alcance técnico, separando claramente qué se compromete a entregar y qué queda fuera.",
+      tasks: [
+        "Redactar Alcances del proyecto",
+        "Redactar Limitaciones del proyecto",
+        "Revisar coherencia con los objetivos específicos"
+      ]
+    },
+    {
+      title: "Etapa 6 — Marco de referencia (reorganización)",
+      desc: "Reestructurar el contenido disperso en Estado del arte / Contexto Histórico / Modelo de negocio hacia las tres subsecciones exigidas: Estado del arte, Marco teórico, y crear el Marco conceptual que hoy no existe como sección propia.",
+      tasks: [
+        "Reorganizar Estado del arte",
+        "Ajustar y depurar Marco teórico",
+        "Redactar Marco conceptual (sección nueva)",
+        "Verificar citas y referencias de esta sección"
+      ]
+    },
+    {
+      title: "Etapa 7 — Marco metodológico y Cronograma",
+      desc: "Filtrar el contenido de metodología dejando solo el enfoque metodológico de desarrollo elegido a nivel general, sin entrar en el detalle de niveles o pruebas que corresponde a la entrega final. Adaptar el cronograma a la tabla de actividades por semanas del formato.",
+      tasks: [
+        "Redactar Aspectos metodológicos de desarrollo (nivel general)",
+        "Filtrar contenido técnico de fases posteriores (niveles, pruebas)",
+        "Adaptar tabla de Cronograma de actividades por semanas"
+      ]
+    },
+    {
+      title: "Etapa 8 — Cierre del documento",
+      desc: "Ajustar Conclusiones parciales para que respondan a cada objetivo específico, depurar Referencias con formato APA consistente, y dejar Anexos según lo que aplique en esta entrega.",
+      tasks: [
+        "Redactar Conclusiones parciales (una por objetivo específico)",
+        "Depurar Referencias en formato APA",
+        "Ajustar Anexos según esta entrega"
+      ]
+    }
+  ];
+
+  const STORAGE_KEY = "ads_cronograma_checklist_v1";
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveState(state) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {}
+  }
+
+  let state = loadState();
+
+  const container = document.getElementById("phases-container");
+
+  phasesData.forEach((phase, pIndex) => {
+    const phaseEl = document.createElement("div");
+    phaseEl.className = "phase";
+    phaseEl.dataset.index = pIndex;
+
+    const header = document.createElement("div");
+    header.className = "phase-header";
+    header.innerHTML = `
+      <div class="phase-number">${pIndex + 1}</div>
+      <div class="phase-title-block">
+        <p class="phase-title">${phase.title}</p>
+        <div class="phase-progress-track">
+          <div class="phase-progress-fill" id="fill-${pIndex}"></div>
+        </div>
+      </div>
+      <div class="phase-percent" id="percent-${pIndex}">0%</div>
+      <div class="phase-caret">▶</div>
+    `;
+
+    const body = document.createElement("div");
+    body.className = "phase-body";
+
+    const descEl = document.createElement("p");
+    descEl.className = "phase-desc";
+    descEl.textContent = phase.desc;
+
+    const list = document.createElement("ul");
+    list.className = "checklist";
+
+    phase.tasks.forEach((task, tIndex) => {
+      const key = `p${pIndex}-t${tIndex}`;
+      const li = document.createElement("li");
+      const checked = !!state[key];
+      const resp = state[`${key}-resp`] || "";
+      li.dataset.resp = resp;
+      li.innerHTML = `
+        <input type="checkbox" id="${key}" ${checked ? "checked" : ""}>
+        <label for="${key}">${task}</label>
+        <select class="resp-select" data-key="${key}">
+          <option value="" ${resp === "" ? "selected" : ""}>Sin asignar</option>
+          <option value="maikoll" ${resp === "maikoll" ? "selected" : ""}>Maikoll Ballesteros</option>
+          <option value="breider" ${resp === "breider" ? "selected" : ""}>Breider Lopez</option>
+        </select>
+      `;
+      list.appendChild(li);
+
+      const checkbox = li.querySelector("input");
+      checkbox.addEventListener("change", () => {
+        state[key] = checkbox.checked;
+        saveState(state);
+        updatePhaseProgress(pIndex);
+        updateOverallProgress();
+        updateRespSummary();
+      });
+
+      const select = li.querySelector(".resp-select");
+      select.addEventListener("change", () => {
+        state[`${key}-resp`] = select.value;
+        li.dataset.resp = select.value;
+        saveState(state);
+        updateRespSummary();
+      });
+    });
+
+    body.appendChild(descEl);
+    body.appendChild(list);
+
+    header.addEventListener("click", () => {
+      phaseEl.classList.toggle("open");
+      if (phaseEl.classList.contains("open")) {
+        body.style.maxHeight = body.scrollHeight + "px";
+      } else {
+        body.style.maxHeight = "0";
+      }
+    });
+
+    phaseEl.appendChild(header);
+    phaseEl.appendChild(body);
+    container.appendChild(phaseEl);
+  });
+
+  function updatePhaseProgress(pIndex) {
+    const total = phasesData[pIndex].tasks.length;
+    let done = 0;
+    for (let t = 0; t < total; t++) {
+      if (state[`p${pIndex}-t${t}`]) done++;
+    }
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    document.getElementById(`fill-${pIndex}`).style.width = pct + "%";
+    document.getElementById(`percent-${pIndex}`).textContent = pct + "%";
+  }
+
+  function updateOverallProgress() {
+    let totalTasks = 0;
+    let doneTasks = 0;
+    phasesData.forEach((phase, pIndex) => {
+      phase.tasks.forEach((t, tIndex) => {
+        totalTasks++;
+        if (state[`p${pIndex}-t${tIndex}`]) doneTasks++;
+      });
+    });
+    const pct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+    document.getElementById("overall-fill").style.width = pct + "%";
+    document.getElementById("overall-text").textContent = `${doneTasks} de ${totalTasks} tareas completadas`;
+    document.getElementById("overall-percent").textContent = pct + "%";
+  }
+
+  function updateRespSummary() {
+    let maikoll = 0, maikollDone = 0, breider = 0, breiderDone = 0, unassigned = 0;
+    phasesData.forEach((phase, pIndex) => {
+      phase.tasks.forEach((t, tIndex) => {
+        const key = `p${pIndex}-t${tIndex}`;
+        const resp = state[`${key}-resp`] || "";
+        const done = !!state[key];
+        if (resp === "maikoll") { maikoll++; if (done) maikollDone++; }
+        else if (resp === "breider") { breider++; if (done) breiderDone++; }
+        else unassigned++;
+      });
+    });
+    document.getElementById("resp-done-maikoll").textContent = maikollDone;
+    document.getElementById("resp-count-maikoll").textContent = maikoll;
+    document.getElementById("resp-done-breider").textContent = breiderDone;
+    document.getElementById("resp-count-breider").textContent = breider;
+    document.getElementById("resp-count-unassigned").textContent = unassigned;
+  }
+
+  // Inicializar todas las barras de progreso
+  phasesData.forEach((_, pIndex) => updatePhaseProgress(pIndex));
+  updateOverallProgress();
+  updateRespSummary();
+
+  document.getElementById("reset-btn").addEventListener("click", () => {
+    if (confirm("¿Seguro que deseas reiniciar el checklist y las asignaciones de responsables? Esta acción no se puede deshacer.")) {
+      state = {};
+      saveState(state);
+      document.querySelectorAll('.checklist input[type="checkbox"]').forEach(cb => cb.checked = false);
+      document.querySelectorAll('.checklist .resp-select').forEach(sel => { sel.value = ""; sel.closest("li").dataset.resp = ""; });
+      phasesData.forEach((_, pIndex) => updatePhaseProgress(pIndex));
+      updateOverallProgress();
+      updateRespSummary();
+    }
+  });
+</script>
+
+</body>
+</html>
