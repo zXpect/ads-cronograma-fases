@@ -27,6 +27,8 @@
     --maikoll-bg: rgba(56, 189, 248, 0.14);
     --breider: #f472b6;
     --breider-bg: rgba(244, 114, 182, 0.14);
+    --ambos: #fbbf24;
+    --ambos-bg: rgba(251, 191, 36, 0.14);
   }
 
   * { box-sizing: border-box; }
@@ -316,6 +318,7 @@
 
   .checklist li[data-resp="maikoll"] .resp-select { border-color: var(--maikoll); color: var(--maikoll); }
   .checklist li[data-resp="breider"] .resp-select { border-color: var(--breider); color: var(--breider); }
+  .checklist li[data-resp="ambos"] .resp-select { border-color: var(--ambos); color: var(--ambos); }
 
   /* ---------- Resumen de responsables ---------- */
   .resp-summary {
@@ -347,6 +350,7 @@
 
   .resp-chip.maikoll { border-color: var(--maikoll); color: var(--maikoll); }
   .resp-chip.breider { border-color: var(--breider); color: var(--breider); }
+  .resp-chip.ambos { border-color: var(--ambos); color: var(--ambos); }
 
   .legend {
     font-family: Arial, sans-serif;
@@ -496,6 +500,7 @@
       <div class="resp-summary">
         <span class="resp-chip maikoll"><span class="dot" style="background:var(--maikoll);"></span>Maikoll Ballesteros: <span id="resp-done-maikoll">0</span> de <span id="resp-count-maikoll">0</span></span>
         <span class="resp-chip breider"><span class="dot" style="background:var(--breider);"></span>Breider Lopez: <span id="resp-done-breider">0</span> de <span id="resp-count-breider">0</span></span>
+        <span class="resp-chip ambos"><span class="dot" style="background:var(--ambos);"></span>Ambos (equipo): <span id="resp-done-ambos">0</span> de <span id="resp-count-ambos">0</span></span>
         <span class="resp-chip"><span class="dot" style="background:var(--gray-border);"></span>Sin asignar: <span id="resp-count-unassigned">0</span></span>
       </div>
     </div>
@@ -673,7 +678,7 @@
     if (!el) return;
     if (firebaseReady) {
       el.className = "fb-banner ok";
-      el.textContent = " Compartido en tiempo real: cualquiera que abra este enlace ve y guarda los mismos cambios.";
+      el.textContent = "🔄 Compartido en tiempo real: cualquiera que abra este enlace ve y guarda los mismos cambios.";
     } else {
       el.className = "fb-banner warn";
       el.textContent = "⚠️ Modo local: por ahora el progreso solo se guarda en este navegador. Ver instrucciones al final del archivo HTML para activar la sincronización compartida.";
@@ -776,6 +781,7 @@
           <option value="" ${resp === "" ? "selected" : ""}>Sin asignar</option>
           <option value="maikoll" ${resp === "maikoll" ? "selected" : ""}>Maikoll Ballesteros</option>
           <option value="breider" ${resp === "breider" ? "selected" : ""}>Breider Lopez</option>
+          <option value="ambos" ${resp === "ambos" ? "selected" : ""}>Ambos (todo el equipo)</option>
         </select>
       `;
       list.appendChild(li);
@@ -840,21 +846,35 @@
   }
 
   function updateRespSummary() {
-    let maikoll = 0, maikollDone = 0, breider = 0, breiderDone = 0, unassigned = 0;
+    let maikoll = 0, maikollDone = 0, breider = 0, breiderDone = 0;
+    let ambos = 0, ambosDone = 0, unassigned = 0;
     phasesData.forEach((phase, pIndex) => {
       phase.tasks.forEach((t, tIndex) => {
         const key = `p${pIndex}-t${tIndex}`;
         const resp = state[`${key}-resp`] || "";
         const done = !!state[key];
-        if (resp === "maikoll") { maikoll++; if (done) maikollDone++; }
-        else if (resp === "breider") { breider++; if (done) breiderDone++; }
-        else unassigned++;
+        if (resp === "maikoll") {
+          maikoll++; if (done) maikollDone++;
+        } else if (resp === "breider") {
+          breider++; if (done) breiderDone++;
+        } else if (resp === "ambos") {
+          // Las tareas "Ambos" cuentan en su propio chip y también se
+          // suman a lo asignado de cada uno, porque el equipo completo
+          // la comparte.
+          ambos++; if (done) ambosDone++;
+          maikoll++; if (done) maikollDone++;
+          breider++; if (done) breiderDone++;
+        } else {
+          unassigned++;
+        }
       });
     });
     document.getElementById("resp-done-maikoll").textContent = maikollDone;
     document.getElementById("resp-count-maikoll").textContent = maikoll;
     document.getElementById("resp-done-breider").textContent = breiderDone;
     document.getElementById("resp-count-breider").textContent = breider;
+    document.getElementById("resp-done-ambos").textContent = ambosDone;
+    document.getElementById("resp-count-ambos").textContent = ambos;
     document.getElementById("resp-count-unassigned").textContent = unassigned;
   }
 
@@ -899,5 +919,8 @@
     }
   });
 </script>
+
+
+
 </body>
 </html>
