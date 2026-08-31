@@ -368,6 +368,83 @@
     vertical-align: middle;
   }
 
+  /* ---------- Calendario del cronograma ---------- */
+  .calendar-widget {
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px solid var(--gray-border);
+    max-width: 380px;
+  }
+
+  .cal-header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .cal-month-title {
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+    color: var(--navy-dark);
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+  }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    font-family: Arial, sans-serif;
+  }
+
+  .cal-weekday {
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--muted);
+    padding-bottom: 4px;
+  }
+
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: var(--surface-alt);
+    border: 1px solid var(--gray-border);
+    font-size: 0.8rem;
+    color: var(--text);
+  }
+
+  .cal-day.other-month {
+    color: var(--muted);
+    opacity: 0.4;
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .cal-day.cal-meeting {
+    border-color: var(--meeting);
+    color: var(--meeting);
+    background: var(--meeting-bg);
+    font-weight: 700;
+  }
+
+  .cal-day.cal-milestone {
+    border-color: var(--accent);
+    color: var(--navy-dark);
+    background: var(--accent-light);
+    font-weight: 700;
+    box-shadow: 0 0 0 2px rgba(109, 92, 255, 0.25);
+  }
+
+  .cal-legend {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
   footer {
     text-align: center;
     color: var(--muted);
@@ -503,6 +580,9 @@
     .resp-select { margin-left: auto; }
 
     .resp-summary { flex-direction: column; align-items: flex-start; }
+
+    .calendar-widget { max-width: 100%; }
+    .cal-day { font-size: 0.72rem; }
   }
 
   .reset-btn {
@@ -606,6 +686,65 @@
         <span class="resp-chip breider"><span class="dot" style="background:var(--breider);"></span>Breider Lopez: <span id="resp-done-breider">0</span> de <span id="resp-count-breider">0</span></span>
         <span class="resp-chip ambos"><span class="dot" style="background:var(--ambos);"></span>Ambos (equipo): <span id="resp-done-ambos">0</span> de <span id="resp-count-ambos">0</span></span>
         <span class="resp-chip"><span class="dot" style="background:var(--gray-border);"></span>Sin asignar: <span id="resp-count-unassigned">0</span></span>
+      </div>
+
+      <div class="calendar-widget">
+        <div class="cal-header">
+          <span class="cal-month-title">Septiembre 2026</span>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-weekday">L</div>
+          <div class="cal-weekday">M</div>
+          <div class="cal-weekday">M</div>
+          <div class="cal-weekday">J</div>
+          <div class="cal-weekday">V</div>
+          <div class="cal-weekday">S</div>
+          <div class="cal-weekday">D</div>
+
+          <div class="cal-day other-month">31</div>
+          <div class="cal-day cal-meeting">1</div>
+          <div class="cal-day cal-meeting">2</div>
+          <div class="cal-day cal-meeting">3</div>
+          <div class="cal-day">4</div>
+          <div class="cal-day">5</div>
+          <div class="cal-day cal-meeting">6</div>
+
+          <div class="cal-day cal-meeting">7</div>
+          <div class="cal-day">8</div>
+          <div class="cal-day cal-meeting">9</div>
+          <div class="cal-day cal-meeting">10</div>
+          <div class="cal-day cal-meeting">11</div>
+          <div class="cal-day cal-meeting">12</div>
+          <div class="cal-day">13</div>
+
+          <div class="cal-day">14</div>
+          <div class="cal-day cal-meeting">15</div>
+          <div class="cal-day cal-milestone">16</div>
+          <div class="cal-day">17</div>
+          <div class="cal-day">18</div>
+          <div class="cal-day">19</div>
+          <div class="cal-day">20</div>
+
+          <div class="cal-day">21</div>
+          <div class="cal-day">22</div>
+          <div class="cal-day">23</div>
+          <div class="cal-day">24</div>
+          <div class="cal-day">25</div>
+          <div class="cal-day">26</div>
+          <div class="cal-day">27</div>
+
+          <div class="cal-day">28</div>
+          <div class="cal-day">29</div>
+          <div class="cal-day">30</div>
+          <div class="cal-day other-month">1</div>
+          <div class="cal-day other-month">2</div>
+          <div class="cal-day other-month">3</div>
+          <div class="cal-day other-month">4</div>
+        </div>
+        <p class="cal-legend">
+          <span class="dot" style="background:var(--meeting-bg); border:1px solid var(--meeting);"></span>Día con reunión programada o posible &nbsp;&nbsp;
+          <span class="dot" style="background:var(--accent-light); border:1px solid var(--accent);"></span>Entrega final (16 sep)
+        </p>
       </div>
     </div>
   </section>
@@ -764,10 +903,10 @@
     const now = new Date();
     const time = now.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     if (ok && mode === "sync") {
-      el.textContent = `Sincronizado con los demás ✓ ${time}`;
+      el.textContent = `Sincronizado con los demás ${time}`;
       el.style.color = "var(--meeting)";
     } else if (ok) {
-      el.textContent = `Guardado ✓ ${time}`;
+      el.textContent = `Guardado ${time}`;
       el.style.color = "var(--meeting)";
     } else {
       el.textContent = "No se pudo guardar. Revisa tu conexión antes de cerrar la pestaña.";
@@ -785,7 +924,7 @@
       el.textContent = "Compartido en tiempo real: cualquiera que abra este enlace ve y guarda los mismos cambios.";
     } else {
       el.className = "fb-banner warn";
-      el.textContent = "Modo local: por ahora el progreso solo se guarda en este navegador. Ver instrucciones al final del archivo HTML para activar la sincronización compartida.";
+      el.textContent = "Modo local: por ahora el progreso solo se guarda en este navegador. Configura Firebase para activar la sincronización compartida.";
     }
   }
 
@@ -1006,7 +1145,7 @@
         const el = document.getElementById("fb-banner");
         if (el) {
           el.className = "fb-banner warn";
-          el.textContent = "⚠️ No se pudo conectar a la base de datos compartida. Revisa tu conexión o las reglas de Firebase.";
+          el.textContent = "No se pudo conectar a la base de datos compartida. Revisa tu conexión o las reglas de Firebase.";
         }
       }
     );
@@ -1038,8 +1177,6 @@
     });
   });
 </script>
-
-
 
 </body>
 </html>
