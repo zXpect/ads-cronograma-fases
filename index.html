@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cronograma — Adaptación al Formato de Anteproyecto (ADS)</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
   :root {
     --navy: #7c5cff;
@@ -378,6 +380,29 @@
     transition: opacity 0.3s ease;
   }
 
+  .fb-banner {
+    max-width: 920px;
+    margin: 0 auto 22px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+    font-size: 0.85rem;
+    text-align: center;
+    border: 1px solid var(--gray-border);
+  }
+
+  .fb-banner.ok {
+    background: var(--meeting-bg);
+    border-color: var(--meeting);
+    color: var(--meeting);
+  }
+
+  .fb-banner.warn {
+    background: var(--breider-bg);
+    border-color: var(--breider);
+    color: var(--breider);
+  }
+
   .reset-btn {
     display: block;
     margin: 0 auto 30px;
@@ -401,6 +426,8 @@
     <h1>Cronograma — Adaptación al Formato de Anteproyecto</h1>
     <p>Proyecto ADS · Entrega de propuesta: 16 de septiembre de 2026</p>
   </header>
+
+  <div class="fb-banner" id="fb-banner">Conectando...</div>
 
   <section>
     <h2>Cronograma general</h2>
@@ -571,48 +598,139 @@
     }
   ];
 
-  const STORAGE_KEY = "ads_cronograma_checklist_v1";
+  // ======================================================================
+  // CONFIGURACIÓN DE FIREBASE — reemplaza estos valores por los de TU
+  // proyecto (Firebase Console → Configuración del proyecto → Tus apps →
+  // app web → "Config"). Instrucciones completas al final de este archivo.
+  // Mientras dejes "TU_API_KEY" tal cual, la app funciona solo en modo
+  // local (cada navegador guarda su propia copia, como antes).
+  // ======================================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyATqI8imMHJ_qEZKPlBfP-8W4OUZO8-HNM",
+    authDomain: "adscronograma.firebaseapp.com",
+    databaseURL: "https://adscronograma-default-rtdb.firebaseio.com",
+    projectId: "adscronograma",
+    storageBucket: "adscronograma.firebasestorage.app",
+    messagingSenderId: "5298170480",
+    appId: "1:5298170480:web:10c9f54c9b658b750d62b5",
+    measurementId: "G-8GMDLPK5QK"
+  };
 
-  function loadState() {
+  const DB_PATH = "ads_cronograma_checklist_v1";
+  const LOCAL_CACHE_KEY = "ads_cronograma_checklist_v1_cache";
+
+  let db = null;
+  let firebaseReady = false;
+
+  if (firebaseConfig.apiKey !== "TU_API_KEY") {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.database();
+      firebaseReady = true;
+    } catch (e) {
+      console.error("No se pudo inicializar Firebase:", e);
+      firebaseReady = false;
+    }
+  }
+
+  function loadLocalCache() {
+    try {
+      const raw = localStorage.getItem(LOCAL_CACHE_KEY);
       return raw ? JSON.parse(raw) : {};
     } catch (e) {
       return {};
     }
   }
 
+  function saveLocalCache(s) {
+    try { localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(s)); } catch (e) {}
+  }
+
   let saveStatusTimer = null;
 
-  function showSaveStatus(ok) {
+  function showSaveStatus(ok, mode) {
     const el = document.getElementById("save-status");
     if (!el) return;
     if (saveStatusTimer) clearTimeout(saveStatusTimer);
-    if (ok) {
-      const now = new Date();
-      const time = now.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    const now = new Date();
+    const time = now.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    if (ok && mode === "sync") {
+      el.textContent = `Sincronizado con los demás ✓ ${time}`;
+      el.style.color = "var(--meeting)";
+    } else if (ok) {
       el.textContent = `Guardado ✓ ${time}`;
       el.style.color = "var(--meeting)";
     } else {
-      el.textContent = "No se pudo guardar en este navegador. Copia tu avance antes de cerrar la pestaña";
+      el.textContent = "No se pudo guardar. Revisa tu conexión antes de cerrar la pestaña.";
       el.style.color = "var(--breider)";
     }
     el.style.opacity = "1";
     saveStatusTimer = setTimeout(() => { el.style.opacity = "0.55"; }, 2500);
   }
 
-  function saveState(state) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      showSaveStatus(true);
-      return true;
-    } catch (e) {
-      showSaveStatus(false);
-      return false;
+  function setBanner() {
+    const el = document.getElementById("fb-banner");
+    if (!el) return;
+    if (firebaseReady) {
+      el.className = "fb-banner ok";
+      el.textContent = "🔄 Compartido en tiempo real: cualquiera que abra este enlace ve y guarda los mismos cambios.";
+    } else {
+      el.className = "fb-banner warn";
+      el.textContent = "⚠️ Modo local: por ahora el progreso solo se guarda en este navegador. Ver instrucciones al final del archivo HTML para activar la sincronización compartida.";
     }
   }
 
-  let state = loadState();
+  // Estado en memoria. Se pinta de inmediato desde la copia local (rápido)
+  // y luego se reemplaza por lo que diga Firebase en cuanto conecta.
+  let state = loadLocalCache();
+  let lastRemoteJSON = null;
+
+  // Aplica el objeto `state` actual a todos los checkboxes/selects ya
+  // creados en el DOM, sin reconstruir la lista (para no perder el
+  // acordeón abierto de cada quien).
+  function applyStateToDOM() {
+    phasesData.forEach((phase, pIndex) => {
+      phase.tasks.forEach((t, tIndex) => {
+        const key = `p${pIndex}-t${tIndex}`;
+        const checkbox = document.getElementById(key);
+        const select = document.querySelector(`.resp-select[data-key="${key}"]`);
+        if (checkbox) checkbox.checked = !!state[key];
+        if (select) {
+          const resp = state[`${key}-resp`] || "";
+          select.value = resp;
+          select.closest("li").dataset.resp = resp;
+        }
+      });
+      updatePhaseProgress(pIndex);
+    });
+    updateOverallProgress();
+    updateRespSummary();
+  }
+
+  // Guarda un cambio puntual (una tarea o una asignación) tanto local
+  // como remotamente. Escribir solo la llave que cambió (en vez de todo
+  // el objeto) evita pisar lo que otra persona esté guardando al mismo tiempo.
+  function commitChange(key, value) {
+    state[key] = value;
+    saveLocalCache(state);
+    lastRemoteJSON = JSON.stringify(state);
+    if (firebaseReady && db) {
+      db.ref(DB_PATH + "/" + key).set(value)
+        .then(() => showSaveStatus(true, "sync"))
+        .catch(() => showSaveStatus(false));
+    } else {
+      showSaveStatus(true, "local");
+    }
+  }
+
+  function resetAllState() {
+    state = {};
+    lastRemoteJSON = JSON.stringify(state);
+    saveLocalCache(state);
+    if (firebaseReady && db) {
+      db.ref(DB_PATH).set({});
+    }
+  }
 
   const container = document.getElementById("phases-container");
 
@@ -664,8 +782,7 @@
 
       const checkbox = li.querySelector("input");
       checkbox.addEventListener("change", () => {
-        state[key] = checkbox.checked;
-        saveState(state);
+        commitChange(key, checkbox.checked);
         updatePhaseProgress(pIndex);
         updateOverallProgress();
         updateRespSummary();
@@ -673,9 +790,8 @@
 
       const select = li.querySelector(".resp-select");
       select.addEventListener("change", () => {
-        state[`${key}-resp`] = select.value;
         li.dataset.resp = select.value;
-        saveState(state);
+        commitChange(`${key}-resp`, select.value);
         updateRespSummary();
       });
     });
@@ -742,21 +858,39 @@
     document.getElementById("resp-count-unassigned").textContent = unassigned;
   }
 
-  // Inicializar todas las barras de progreso
-  phasesData.forEach((_, pIndex) => updatePhaseProgress(pIndex));
-  updateOverallProgress();
-  updateRespSummary();
+  // Pintado inicial con lo que haya en la copia local (instantáneo)
+  applyStateToDOM();
+  setBanner();
 
-  // Guarda también si el usuario cierra o cambia de pestaña justo después de marcar algo
-  window.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") saveState(state);
-  });
-  window.addEventListener("pagehide", () => saveState(state));
+  // Suscripción en tiempo real: cuando cualquier persona cambia algo,
+  // este listener recibe el nuevo estado y repinta todos los navegadores
+  // abiertos, sin recargar la página.
+  if (firebaseReady && db) {
+    db.ref(DB_PATH).on(
+      "value",
+      (snapshot) => {
+        const remote = snapshot.val() || {};
+        const json = JSON.stringify(remote);
+        if (json === lastRemoteJSON) return; // ya lo teníamos, evita parpadeos
+        lastRemoteJSON = json;
+        state = remote;
+        saveLocalCache(state);
+        applyStateToDOM();
+        showSaveStatus(true, "sync");
+      },
+      () => {
+        const el = document.getElementById("fb-banner");
+        if (el) {
+          el.className = "fb-banner warn";
+          el.textContent = "⚠️ No se pudo conectar a la base de datos compartida. Revisa tu conexión o las reglas de Firebase.";
+        }
+      }
+    );
+  }
 
   document.getElementById("reset-btn").addEventListener("click", () => {
-    if (confirm("¿Seguro que deseas reiniciar el checklist y las asignaciones de responsables? Esta acción no se puede deshacer.")) {
-      state = {};
-      saveState(state);
+    if (confirm("¿Seguro que deseas reiniciar el checklist y las asignaciones de responsables para TODOS? Esta acción no se puede deshacer.")) {
+      resetAllState();
       document.querySelectorAll('.checklist input[type="checkbox"]').forEach(cb => cb.checked = false);
       document.querySelectorAll('.checklist .resp-select').forEach(sel => { sel.value = ""; sel.closest("li").dataset.resp = ""; });
       phasesData.forEach((_, pIndex) => updatePhaseProgress(pIndex));
@@ -765,6 +899,40 @@
     }
   });
 </script>
+
+<!--
+======================================================================
+CÓMO ACTIVAR LA SINCRONIZACIÓN COMPARTIDA (Firebase, gratis, ~2 min)
+======================================================================
+1. Entra a https://console.firebase.google.com con una cuenta de Google.
+2. "Agregar proyecto" → ponle un nombre (ej. "cronograma-ads") → puedes
+   desactivar Google Analytics → "Crear proyecto".
+3. En el panel izquierdo: "Compilación" → "Realtime Database" →
+   "Crear base de datos" → elige una ubicación → inicia en
+   "modo de prueba" (esto te da reglas abiertas por 30 días; luego
+   reemplázalas por las de abajo para que no caduquen).
+4. En "Reglas" de Realtime Database, pega esto y publica:
+   {
+     "rules": {
+       ".read": true,
+       ".write": true
+     }
+   }
+   (Como esta herramienta no tiene login, cualquiera con el enlace del
+   sitio puede leer y escribir. Está bien para un checklist interno de
+   equipo, pero no la uses para datos sensibles.)
+5. En el panel izquierdo: ⚙️ "Configuración del proyecto" → baja hasta
+   "Tus apps" → ícono "</>" (Web) → ponle un apodo → "Registrar app".
+   Te va a mostrar un bloque `firebaseConfig = {...}`.
+6. Copia esos 7 valores (apiKey, authDomain, databaseURL, projectId,
+   storageBucket, messagingSenderId, appId) y reemplázalos en este mismo
+   archivo HTML, en la constante `firebaseConfig` (búscala cerca del
+   inicio de la etiqueta <script> principal).
+7. Guarda el archivo y vuelve a subirlo a Netlify. Listo: ahora todo el
+   que abra el enlace comparte el mismo progreso en tiempo real.
+======================================================================
+-->
+
 
 </body>
 </html>
