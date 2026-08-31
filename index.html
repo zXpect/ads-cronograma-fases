@@ -673,7 +673,7 @@
     if (!el) return;
     if (firebaseReady) {
       el.className = "fb-banner ok";
-      el.textContent = "🔄 Compartido en tiempo real: cualquiera que abra este enlace ve y guarda los mismos cambios.";
+      el.textContent = " Compartido en tiempo real: cualquiera que abra este enlace ve y guarda los mismos cambios.";
     } else {
       el.className = "fb-banner warn";
       el.textContent = "⚠️ Modo local: por ahora el progreso solo se guarda en este navegador. Ver instrucciones al final del archivo HTML para activar la sincronización compartida.";
@@ -899,40 +899,5 @@
     }
   });
 </script>
-
-<!--
-======================================================================
-CÓMO ACTIVAR LA SINCRONIZACIÓN COMPARTIDA (Firebase, gratis, ~2 min)
-======================================================================
-1. Entra a https://console.firebase.google.com con una cuenta de Google.
-2. "Agregar proyecto" → ponle un nombre (ej. "cronograma-ads") → puedes
-   desactivar Google Analytics → "Crear proyecto".
-3. En el panel izquierdo: "Compilación" → "Realtime Database" →
-   "Crear base de datos" → elige una ubicación → inicia en
-   "modo de prueba" (esto te da reglas abiertas por 30 días; luego
-   reemplázalas por las de abajo para que no caduquen).
-4. En "Reglas" de Realtime Database, pega esto y publica:
-   {
-     "rules": {
-       ".read": true,
-       ".write": true
-     }
-   }
-   (Como esta herramienta no tiene login, cualquiera con el enlace del
-   sitio puede leer y escribir. Está bien para un checklist interno de
-   equipo, pero no la uses para datos sensibles.)
-5. En el panel izquierdo: ⚙️ "Configuración del proyecto" → baja hasta
-   "Tus apps" → ícono "</>" (Web) → ponle un apodo → "Registrar app".
-   Te va a mostrar un bloque `firebaseConfig = {...}`.
-6. Copia esos 7 valores (apiKey, authDomain, databaseURL, projectId,
-   storageBucket, messagingSenderId, appId) y reemplázalos en este mismo
-   archivo HTML, en la constante `firebaseConfig` (búscala cerca del
-   inicio de la etiqueta <script> principal).
-7. Guarda el archivo y vuelve a subirlo a Netlify. Listo: ahora todo el
-   que abra el enlace comparte el mismo progreso en tiempo real.
-======================================================================
--->
-
-
 </body>
 </html>
