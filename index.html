@@ -407,6 +407,104 @@
     color: var(--breider);
   }
 
+  /* ---------- Navegación por pestañas ---------- */
+  .tabs-nav {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    gap: 8px;
+    background: var(--gray-bg);
+    padding: 12px 0 16px;
+    margin-bottom: 22px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs-nav::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex: 0 0 auto;
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--gray-border);
+    border-radius: 999px;
+    padding: 10px 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .tab-btn:hover { color: var(--navy-dark); border-color: var(--accent); }
+
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #f5f3ff;
+    border-color: var(--accent);
+    box-shadow: 0 4px 16px rgba(109, 92, 255, 0.35);
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: tabFadeIn 0.2s ease; }
+
+  @keyframes tabFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- Responsive: pantallas pequeñas ---------- */
+  @media (max-width: 640px) {
+    body { padding: 22px 12px 60px; }
+    header h1 { font-size: 1.3rem; }
+    header p { font-size: 0.85rem; }
+    section { padding: 18px 16px; margin-bottom: 20px; }
+    section > h2 { font-size: 1.05rem; }
+
+    .tab-btn { font-size: 0.82rem; padding: 8px 14px; }
+
+    /* La tabla del cronograma se convierte en tarjetas apiladas */
+    table, thead, tbody, th, td, tr { display: block; }
+    thead { display: none; }
+    table { border: none; }
+    tbody tr {
+      background: var(--surface-alt);
+      border: 1px solid var(--gray-border);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      padding: 10px 14px;
+    }
+    tbody tr:nth-child(even) { background: var(--surface-alt); }
+    tbody td {
+      border-bottom: none;
+      padding: 5px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      text-align: right;
+    }
+    tbody td::before {
+      content: attr(data-label);
+      font-weight: 700;
+      color: var(--muted);
+      flex-shrink: 0;
+      text-align: left;
+    }
+
+    .phase-header { flex-wrap: wrap; gap: 10px 14px; }
+    .phase-title-block { min-width: 140px; }
+    .phase-percent { order: 3; }
+    .phase-caret { order: 4; }
+
+    .checklist li { flex-wrap: wrap; }
+    .resp-select { margin-left: auto; }
+
+    .resp-summary { flex-direction: column; align-items: flex-start; }
+  }
+
   .reset-btn {
     display: block;
     margin: 0 auto 30px;
@@ -433,7 +531,13 @@
 
   <div class="fb-banner" id="fb-banner">Conectando...</div>
 
-  <section>
+  <nav class="tabs-nav" role="tablist" id="tabs-nav">
+    <button class="tab-btn active" data-tab="cronograma" role="tab" aria-selected="true">Cronograma</button>
+    <button class="tab-btn" data-tab="avance" role="tab" aria-selected="false">Avance</button>
+    <button class="tab-btn" data-tab="fases" role="tab" aria-selected="false">Fases</button>
+  </nav>
+
+  <section id="tab-cronograma" class="tab-panel active">
     <h2>Cronograma general</h2>
     <table>
       <thead>
@@ -445,39 +549,39 @@
       </thead>
       <tbody>
         <tr class="meeting-row">
-          <td>Lun 31 ago – Jue 3 sep</td>
-          <td>Fases 1, 2 y 3</td>
-          <td>Reunión con el docente director</td>
+          <td data-label="Fechas">Lun 31 ago – Jue 3 sep</td>
+          <td data-label="Fases">Fases 1, 2 y 3</td>
+          <td data-label="Hito">Reunión con el docente director</td>
         </tr>
         <tr class="meeting-row">
-          <td>Vie 4 – Dom 6 sep</td>
-          <td>Fases 4 y 5</td>
-          <td>Reunión el domingo 6 o lunes 7 sep</td>
+          <td data-label="Fechas">Vie 4 – Dom 6 sep</td>
+          <td data-label="Fases">Fases 4 y 5</td>
+          <td data-label="Hito">Reunión el domingo 6 o lunes 7 sep</td>
         </tr>
         <tr class="meeting-row">
-          <td>Lun 7 – Mié 9 sep</td>
-          <td>Fase 6</td>
-          <td>Reunión el mismo miércoles o jueves 10</td>
+          <td data-label="Fechas">Lun 7 – Mié 9 sep</td>
+          <td data-label="Fases">Fase 6</td>
+          <td data-label="Hito">Reunión el mismo miércoles o jueves 10</td>
         </tr>
         <tr class="meeting-row">
-          <td>Jue 10 – Vie 11 sep</td>
-          <td>Fases 7 y 8</td>
-          <td>Reunión 11 o 12 sep — revisión de correcciones finales</td>
+          <td data-label="Fechas">Jue 10 – Vie 11 sep</td>
+          <td data-label="Fases">Fases 7 y 8</td>
+          <td data-label="Hito">Reunión 11 o 12 sep — revisión de correcciones finales</td>
         </tr>
         <tr>
-          <td>Sáb 12 – Lun 14 sep</td>
-          <td>Ajustes según correcciones</td>
-          <td>Revisión de tablas y referencias</td>
+          <td data-label="Fechas">Sáb 12 – Lun 14 sep</td>
+          <td data-label="Fases">Ajustes según correcciones</td>
+          <td data-label="Hito">Revisión de tablas y referencias</td>
         </tr>
         <tr class="meeting-row">
-          <td>Mar 15 sep</td>
-          <td>—</td>
-          <td>Reunión final — última revisión previa a entrega</td>
+          <td data-label="Fechas">Mar 15 sep</td>
+          <td data-label="Fases">—</td>
+          <td data-label="Hito">Reunión final — última revisión previa a entrega</td>
         </tr>
         <tr class="milestone-row">
-          <td>Mié 16 sep</td>
-          <td>—</td>
-          <td>Entrega de la propuesta</td>
+          <td data-label="Fechas">Mié 16 sep</td>
+          <td data-label="Fases">—</td>
+          <td data-label="Hito">Entrega de la propuesta</td>
         </tr>
       </tbody>
     </table>
@@ -487,7 +591,7 @@
     </p>
   </section>
 
-  <section>
+  <section id="tab-avance" class="tab-panel">
     <h2>Avance general de fases</h2>
     <div class="overall">
       <div class="overall-bar-track">
@@ -506,7 +610,7 @@
     </div>
   </section>
 
-  <section>
+  <section id="tab-fases" class="tab-panel">
     <h2>Fases del proyecto</h2>
     <button class="reset-btn" id="reset-btn">Reiniciar todo el checklist</button>
     <div id="phases-container"></div>
@@ -678,10 +782,10 @@
     if (!el) return;
     if (firebaseReady) {
       el.className = "fb-banner ok";
-      el.textContent = " Compartido en tiempo real: cualquiera que abra este enlace ve y guarda los mismos cambios.";
+      el.textContent = "Compartido en tiempo real: cualquiera que abra este enlace ve y guarda los mismos cambios.";
     } else {
       el.className = "fb-banner warn";
-      el.textContent = "⚠️ Modo local: por ahora el progreso solo se guarda en este navegador. Ver instrucciones al final del archivo HTML para activar la sincronización compartida.";
+      el.textContent = "Modo local: por ahora el progreso solo se guarda en este navegador. Ver instrucciones al final del archivo HTML para activar la sincronización compartida.";
     }
   }
 
@@ -917,6 +1021,21 @@
       updateOverallProgress();
       updateRespSummary();
     }
+  });
+
+  // ---------- Navegación por pestañas ----------
+  document.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.tab;
+      document.querySelectorAll(".tab-btn").forEach((b) => {
+        b.classList.toggle("active", b === btn);
+        b.setAttribute("aria-selected", b === btn ? "true" : "false");
+      });
+      document.querySelectorAll(".tab-panel").forEach((panel) => {
+        panel.classList.toggle("active", panel.id === `tab-${target}`);
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
   });
 </script>
 
