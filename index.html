@@ -406,38 +406,71 @@
   }
 
   .cal-day {
-    aspect-ratio: 1;
+    min-height: 46px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 2px;
     border-radius: 8px;
     background: var(--surface-alt);
     border: 1px solid var(--gray-border);
+    padding: 4px 2px;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .cal-day-num {
     font-size: 0.8rem;
     color: var(--text);
+    font-weight: 600;
+  }
+
+  .cal-day-tag {
+    font-size: 0.56rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    min-height: 1em;
   }
 
   .cal-day.other-month {
-    color: var(--muted);
-    opacity: 0.4;
+    opacity: 0.35;
     border-color: transparent;
     background: transparent;
   }
 
-  .cal-day.cal-meeting {
-    border-color: var(--meeting);
-    color: var(--meeting);
-    background: var(--meeting-bg);
-    font-weight: 700;
+  .cal-day.other-month .cal-day-num,
+  .cal-day.other-month .cal-day-tag {
+    color: var(--muted);
   }
+
+  /* Sin marcar todavía (0% de avance en esa fase) */
+  .cal-day.cal-pending .cal-day-tag { color: var(--muted); }
+
+  /* Fase en progreso */
+  .cal-day.cal-progress {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+  .cal-day.cal-progress .cal-day-num,
+  .cal-day.cal-progress .cal-day-tag { color: var(--navy-dark); }
+
+  /* Fase completada al 100% */
+  .cal-day.cal-done {
+    border-color: var(--meeting);
+    background: var(--meeting-bg);
+  }
+  .cal-day.cal-done .cal-day-num,
+  .cal-day.cal-done .cal-day-tag { color: var(--meeting); }
 
   .cal-day.cal-milestone {
     border-color: var(--accent);
-    color: var(--navy-dark);
     background: var(--accent-light);
-    font-weight: 700;
     box-shadow: 0 0 0 2px rgba(109, 92, 255, 0.25);
   }
+  .cal-day.cal-milestone .cal-day-num,
+  .cal-day.cal-milestone .cal-day-tag { color: var(--navy-dark); font-weight: 700; }
 
   .cal-legend {
     margin-top: 12px;
@@ -582,7 +615,9 @@
     .resp-summary { flex-direction: column; align-items: flex-start; }
 
     .calendar-widget { max-width: 100%; }
-    .cal-day { font-size: 0.72rem; }
+    .cal-day { min-height: 40px; }
+    .cal-day-num { font-size: 0.72rem; }
+    .cal-day-tag { font-size: 0.5rem; }
   }
 
   .reset-btn {
@@ -692,7 +727,7 @@
         <div class="cal-header">
           <span class="cal-month-title">Septiembre 2026</span>
         </div>
-        <div class="cal-grid">
+        <div class="cal-grid" id="cal-grid">
           <div class="cal-weekday">L</div>
           <div class="cal-weekday">M</div>
           <div class="cal-weekday">M</div>
@@ -701,49 +736,51 @@
           <div class="cal-weekday">S</div>
           <div class="cal-weekday">D</div>
 
-          <div class="cal-day other-month">31</div>
-          <div class="cal-day cal-meeting">1</div>
-          <div class="cal-day cal-meeting">2</div>
-          <div class="cal-day cal-meeting">3</div>
-          <div class="cal-day">4</div>
-          <div class="cal-day">5</div>
-          <div class="cal-day cal-meeting">6</div>
+          <div class="cal-day" data-date="2026-08-31"><span class="cal-day-num">31</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-01"><span class="cal-day-num">1</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-02"><span class="cal-day-num">2</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-03"><span class="cal-day-num">3</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-04"><span class="cal-day-num">4</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-05"><span class="cal-day-num">5</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-06"><span class="cal-day-num">6</span><span class="cal-day-tag"></span></div>
 
-          <div class="cal-day cal-meeting">7</div>
-          <div class="cal-day">8</div>
-          <div class="cal-day cal-meeting">9</div>
-          <div class="cal-day cal-meeting">10</div>
-          <div class="cal-day cal-meeting">11</div>
-          <div class="cal-day cal-meeting">12</div>
-          <div class="cal-day">13</div>
+          <div class="cal-day" data-date="2026-09-07"><span class="cal-day-num">7</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-08"><span class="cal-day-num">8</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-09"><span class="cal-day-num">9</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-10"><span class="cal-day-num">10</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-11"><span class="cal-day-num">11</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-12"><span class="cal-day-num">12</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-13"><span class="cal-day-num">13</span><span class="cal-day-tag"></span></div>
 
-          <div class="cal-day">14</div>
-          <div class="cal-day cal-meeting">15</div>
-          <div class="cal-day cal-milestone">16</div>
-          <div class="cal-day">17</div>
-          <div class="cal-day">18</div>
-          <div class="cal-day">19</div>
-          <div class="cal-day">20</div>
+          <div class="cal-day" data-date="2026-09-14"><span class="cal-day-num">14</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-15"><span class="cal-day-num">15</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day cal-milestone" data-date="2026-09-16"><span class="cal-day-num">16</span><span class="cal-day-tag">Entrega</span></div>
+          <div class="cal-day" data-date="2026-09-17"><span class="cal-day-num">17</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-18"><span class="cal-day-num">18</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-19"><span class="cal-day-num">19</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-20"><span class="cal-day-num">20</span><span class="cal-day-tag"></span></div>
 
-          <div class="cal-day">21</div>
-          <div class="cal-day">22</div>
-          <div class="cal-day">23</div>
-          <div class="cal-day">24</div>
-          <div class="cal-day">25</div>
-          <div class="cal-day">26</div>
-          <div class="cal-day">27</div>
+          <div class="cal-day" data-date="2026-09-21"><span class="cal-day-num">21</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-22"><span class="cal-day-num">22</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-23"><span class="cal-day-num">23</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-24"><span class="cal-day-num">24</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-25"><span class="cal-day-num">25</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-26"><span class="cal-day-num">26</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-27"><span class="cal-day-num">27</span><span class="cal-day-tag"></span></div>
 
-          <div class="cal-day">28</div>
-          <div class="cal-day">29</div>
-          <div class="cal-day">30</div>
-          <div class="cal-day other-month">1</div>
-          <div class="cal-day other-month">2</div>
-          <div class="cal-day other-month">3</div>
-          <div class="cal-day other-month">4</div>
+          <div class="cal-day" data-date="2026-09-28"><span class="cal-day-num">28</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-29"><span class="cal-day-num">29</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day" data-date="2026-09-30"><span class="cal-day-num">30</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day other-month" data-date="2026-10-01"><span class="cal-day-num">1</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day other-month" data-date="2026-10-02"><span class="cal-day-num">2</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day other-month" data-date="2026-10-03"><span class="cal-day-num">3</span><span class="cal-day-tag"></span></div>
+          <div class="cal-day other-month" data-date="2026-10-04"><span class="cal-day-num">4</span><span class="cal-day-tag"></span></div>
         </div>
         <p class="cal-legend">
-          <span class="dot" style="background:var(--meeting-bg); border:1px solid var(--meeting);"></span>Día con reunión programada o posible &nbsp;&nbsp;
-          <span class="dot" style="background:var(--accent-light); border:1px solid var(--accent);"></span>Entrega final (16 sep)
+          <span class="dot" style="background:var(--surface-alt); border:1px solid var(--gray-border);"></span>Fase pendiente &nbsp;&nbsp;
+          <span class="dot" style="background:var(--accent-light); border:1px solid var(--accent);"></span>Fase en progreso &nbsp;&nbsp;
+          <span class="dot" style="background:var(--meeting-bg); border:1px solid var(--meeting);"></span>Fase completada &nbsp;&nbsp;
+          <span class="dot" style="background:var(--accent-light); border:1px solid var(--accent); box-shadow: 0 0 0 2px rgba(109, 92, 255, 0.25);"></span>Entrega final
         </p>
       </div>
     </div>
@@ -953,6 +990,7 @@
     });
     updateOverallProgress();
     updateRespSummary();
+    updateCalendar();
   }
 
   // Guarda un cambio puntual (una tarea o una asignación) tanto local
@@ -1035,6 +1073,7 @@
         updatePhaseProgress(pIndex);
         updateOverallProgress();
         updateRespSummary();
+        updateCalendar();
       });
 
       const select = li.querySelector(".resp-select");
@@ -1121,6 +1160,55 @@
     document.getElementById("resp-count-unassigned").textContent = unassigned;
   }
 
+  // Qué fase(s) (índice en phasesData, empieza en 0) le corresponde a
+  // cada fecha del calendario, según los rangos del cronograma general.
+  const calendarPhaseMap = {
+    "2026-08-31": [0, 1, 2],
+    "2026-09-01": [0, 1, 2],
+    "2026-09-02": [0, 1, 2],
+    "2026-09-03": [0, 1, 2],
+    "2026-09-04": [3, 4],
+    "2026-09-05": [3, 4],
+    "2026-09-06": [3, 4],
+    "2026-09-07": [5],
+    "2026-09-08": [5],
+    "2026-09-09": [5],
+    "2026-09-10": [6, 7],
+    "2026-09-11": [6, 7]
+  };
+
+  function phaseProgressPct(pIndex) {
+    const total = phasesData[pIndex].tasks.length;
+    let done = 0;
+    for (let t = 0; t < total; t++) {
+      if (state[`p${pIndex}-t${t}`]) done++;
+    }
+    return total > 0 ? (done / total) * 100 : 0;
+  }
+
+  // Pinta cada casilla del calendario según el avance real de la(s)
+  // fase(s) que le corresponden a esa fecha, y muestra "Fase N" (o el
+  // rango) debajo del número del día.
+  function updateCalendar() {
+    document.querySelectorAll("#cal-grid .cal-day[data-date]").forEach((cell) => {
+      if (cell.classList.contains("cal-milestone")) return; // el 16 se queda fijo
+      const phases = calendarPhaseMap[cell.dataset.date];
+      const tagEl = cell.querySelector(".cal-day-tag");
+      cell.classList.remove("cal-pending", "cal-progress", "cal-done");
+      if (!phases) return; // fecha sin fase asociada (ajustes, reunión final, etc.)
+
+      const label = phases.length > 1
+        ? `Fase ${phases[0] + 1}-${phases[phases.length - 1] + 1}`
+        : `Fase ${phases[0] + 1}`;
+      if (tagEl) tagEl.textContent = label;
+
+      const avg = phases.reduce((sum, p) => sum + phaseProgressPct(p), 0) / phases.length;
+      if (avg >= 100) cell.classList.add("cal-done");
+      else if (avg > 0) cell.classList.add("cal-progress");
+      else cell.classList.add("cal-pending");
+    });
+  }
+
   // Pintado inicial con lo que haya en la copia local (instantáneo)
   applyStateToDOM();
   setBanner();
@@ -1159,6 +1247,7 @@
       phasesData.forEach((_, pIndex) => updatePhaseProgress(pIndex));
       updateOverallProgress();
       updateRespSummary();
+      updateCalendar();
     }
   });
 
