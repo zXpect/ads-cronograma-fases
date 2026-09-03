@@ -113,7 +113,7 @@
 
   tbody tr:nth-child(even) { background: var(--surface-alt); }
 
-  tr.meeting-row td:nth-child(3) {
+  tr.meeting-row td:nth-child(6) {
     color: var(--meeting);
     font-weight: 600;
   }
@@ -641,7 +641,7 @@
 
   <header>
     <h1>Cronograma — Adaptación al Formato de Anteproyecto</h1>
-    <p>Proyecto ADS · Entrega de propuesta: 16 de septiembre de 2026</p>
+    <p>Proyecto ADS · Entrega de propuesta: martes 15 de septiembre de 2026 (antes del mediodía)</p>
   </header>
 
   <div class="fb-banner" id="fb-banner">Conectando...</div>
@@ -657,51 +657,67 @@
     <table>
       <thead>
         <tr>
-          <th>Fechas</th>
-          <th>Fases</th>
-          <th>Hito</th>
+          <th>#</th>
+          <th>Fecha propuesta</th>
+          <th>Opción alterna</th>
+          <th>Fase(s) a revisar</th>
+          <th>Motivo de la reunión</th>
+          <th>Hora</th>
         </tr>
       </thead>
       <tbody>
         <tr class="meeting-row">
-          <td data-label="Fechas">Lun 31 ago – Jue 3 sep</td>
-          <td data-label="Fases">Fases 1, 2 y 3</td>
-          <td data-label="Hito">Reunión con el docente director</td>
+          <td data-label="#">1</td>
+          <td data-label="Fecha propuesta">Jueves 3 de septiembre</td>
+          <td data-label="Opción alterna">—</td>
+          <td data-label="Fase(s) a revisar">Fases 1, 2 y 3</td>
+          <td data-label="Motivo">Revisión de mapeo de contenido, portada/índice e introducción-resumen</td>
+          <td data-label="Hora">Jueves 7:00 pm</td>
         </tr>
         <tr class="meeting-row">
-          <td data-label="Fechas">Vie 4 – Dom 6 sep</td>
-          <td data-label="Fases">Fases 4 y 5</td>
-          <td data-label="Hito">Reunión el domingo 6 o lunes 7 sep</td>
+          <td data-label="#">2</td>
+          <td data-label="Fecha propuesta">Domingo 6 de septiembre</td>
+          <td data-label="Opción alterna">Lunes 7 de septiembre</td>
+          <td data-label="Fase(s) a revisar">Fases 4 y 5</td>
+          <td data-label="Motivo">Revisión de problema, justificación, objetivos, alcances y limitaciones</td>
+          <td data-label="Hora">Domingo 3:00 pm</td>
         </tr>
         <tr class="meeting-row">
-          <td data-label="Fechas">Lun 7 – Mié 9 sep</td>
-          <td data-label="Fases">Fase 6</td>
-          <td data-label="Hito">Reunión el mismo miércoles o jueves 10</td>
+          <td data-label="#">3</td>
+          <td data-label="Fecha propuesta">Miércoles 9 de septiembre</td>
+          <td data-label="Opción alterna">Jueves 10 de septiembre</td>
+          <td data-label="Fase(s) a revisar">Fase 6</td>
+          <td data-label="Motivo">Revisión del marco de referencia (estado del arte, marco teórico y conceptual)</td>
+          <td data-label="Hora">Jueves 7:00 pm</td>
         </tr>
         <tr class="meeting-row">
-          <td data-label="Fechas">Jue 10 – Vie 11 sep</td>
-          <td data-label="Fases">Fases 7 y 8</td>
-          <td data-label="Hito">Reunión 11 o 12 sep — revisión de correcciones finales</td>
-        </tr>
-        <tr>
-          <td data-label="Fechas">Sáb 12 – Lun 14 sep</td>
-          <td data-label="Fases">Ajustes según correcciones</td>
-          <td data-label="Hito">Revisión de tablas y referencias</td>
+          <td data-label="#">4</td>
+          <td data-label="Fecha propuesta">Viernes 11 de septiembre</td>
+          <td data-label="Opción alterna">Sábado 12 de septiembre</td>
+          <td data-label="Fase(s) a revisar">Fases 7 y 8</td>
+          <td data-label="Motivo">Revisión de correcciones finales (marco metodológico, cronograma, conclusiones, referencias)</td>
+          <td data-label="Hora">Viernes 6:00 pm</td>
         </tr>
         <tr class="meeting-row">
-          <td data-label="Fechas">Mar 15 sep</td>
-          <td data-label="Fases">—</td>
-          <td data-label="Hito">Reunión final — última revisión previa a entrega</td>
+          <td data-label="#">5</td>
+          <td data-label="Fecha propuesta">Lunes 14 de septiembre</td>
+          <td data-label="Opción alterna">—</td>
+          <td data-label="Fase(s) a revisar">Documento completo</td>
+          <td data-label="Motivo">Última revisión previa a la entrega del 15 de septiembre</td>
+          <td data-label="Hora">Lunes 7:00 pm</td>
         </tr>
         <tr class="milestone-row">
-          <td data-label="Fechas">Mié 16 sep</td>
-          <td data-label="Fases">—</td>
-          <td data-label="Hito">Entrega de la propuesta</td>
+          <td data-label="#">6</td>
+          <td data-label="Fecha propuesta">Martes 15 de septiembre</td>
+          <td data-label="Opción alterna">—</td>
+          <td data-label="Fase(s) a revisar">Entrega propuesta</td>
+          <td data-label="Motivo">Entrega final del anteproyecto</td>
+          <td data-label="Hora">Antes del mediodía</td>
         </tr>
       </tbody>
     </table>
     <p class="legend">
-      <span class="dot" style="background:var(--meeting-bg); border:1px solid var(--meeting);"></span>Fila con reunión programada &nbsp;&nbsp;
+      <span class="dot" style="background:var(--meeting-bg); border:1px solid var(--meeting);"></span>Reunión confirmada con el docente director &nbsp;&nbsp;
       <span class="dot" style="background:var(--accent-light); border:1px solid var(--accent);"></span>Entrega final
     </p>
   </section>
@@ -753,8 +769,8 @@
           <div class="cal-day" data-date="2026-09-13"><span class="cal-day-num">13</span><span class="cal-day-tag"></span></div>
 
           <div class="cal-day" data-date="2026-09-14"><span class="cal-day-num">14</span><span class="cal-day-tag"></span></div>
-          <div class="cal-day" data-date="2026-09-15"><span class="cal-day-num">15</span><span class="cal-day-tag"></span></div>
-          <div class="cal-day cal-milestone" data-date="2026-09-16"><span class="cal-day-num">16</span><span class="cal-day-tag">Entrega</span></div>
+          <div class="cal-day cal-milestone" data-date="2026-09-15"><span class="cal-day-num">15</span><span class="cal-day-tag">Entrega</span></div>
+          <div class="cal-day" data-date="2026-09-16"><span class="cal-day-num">16</span><span class="cal-day-tag"></span></div>
           <div class="cal-day" data-date="2026-09-17"><span class="cal-day-num">17</span><span class="cal-day-tag"></span></div>
           <div class="cal-day" data-date="2026-09-18"><span class="cal-day-num">18</span><span class="cal-day-tag"></span></div>
           <div class="cal-day" data-date="2026-09-19"><span class="cal-day-num">19</span><span class="cal-day-tag"></span></div>
@@ -1191,7 +1207,7 @@
   // rango) debajo del número del día.
   function updateCalendar() {
     document.querySelectorAll("#cal-grid .cal-day[data-date]").forEach((cell) => {
-      if (cell.classList.contains("cal-milestone")) return; // el 16 se queda fijo
+      if (cell.classList.contains("cal-milestone")) return; // el día de entrega se queda fijo
       const phases = calendarPhaseMap[cell.dataset.date];
       const tagEl = cell.querySelector(".cal-day-tag");
       cell.classList.remove("cal-pending", "cal-progress", "cal-done");
